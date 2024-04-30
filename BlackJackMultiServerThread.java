@@ -21,24 +21,21 @@ public class BlackJackMultiServerThread extends Thread {
         try (
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-        // BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         ) {
             Message inputMsg, outputMsg;
             String content;
             boolean playing = true;
             boolean gameFinished;
             int player;
-            // BlackJackProtocol bjp = new BlackJackProtocol();
 
-            // Send a message to the Player verifying the connection and sending the shared
-            // resource
+            // Send a message to the Player verifying the connection
             out.writeObject(new Message("Server", "Connection established."));
 
             while (playing) {
                 gameFinished = false;
                 player = -1;
-                //clear the dealer's hand for a new game
-                dealer.clear();
+                // reset the dealer's hand for a new game
+                dealer = new Hand();
                 // initialize the game by dealing the Player and Server two cards each
                 for (int i = 1; i <= 2; i++) {
                     // deal the server a Card
@@ -48,6 +45,7 @@ public class BlackJackMultiServerThread extends Thread {
                 }
 
                 // Dealer must check for Blackjack at the beginning of the game
+                //TODO add replayability if dealer has blackjack
                 if (dealer.validate() == 0) {
                     out.writeObject(new Message("Dealer", dealer + "\nDealer has Blackjack!. Thank you for playing."));
                     socket.close();
@@ -59,48 +57,52 @@ public class BlackJackMultiServerThread extends Thread {
                     // get the content of the Message
                     content = inputMsg.getContent();
                     if (content != null) {
+                        //determine what to do based on Player's action
                         switch (content.trim().toLowerCase()) {
                             // if the player wants to draw another card
                             case "hit":
                                 outputMsg = new Message("Dealer", "Player hit", deck.deal());
                                 out.writeObject(outputMsg);
-                                // System.out.println(outputMsg);
                                 break;
                             // if the player wants to stop drawing cards
                             case "stand":
-                                // send Message of current action
                                 outputMsg = new Message("Dealer", "Player stands");
                                 out.writeObject(outputMsg);
-                                // System.out.println(outputMsg);
 
                                 // Dealer draws cards until Hand value of at least 17
                                 while (dealer.getValue() < 17) {
                                     Card c = deck.deal();
                                     dealer.add(c);
-                                    // System.out.println(outputMsg);
                                 }
+                                // send the Dealer's final Hand
                                 outputMsg = new Message("Dealer", "", dealer);
                                 out.writeObject(outputMsg);
+
                                 gameFinished = true;
                                 break;
+                            //if the Player has over 21
                             case "bust":
                                 // Send the Dealer's Hand
                                 outputMsg = new Message("Dealer", "", dealer);
                                 out.writeObject(outputMsg);
+
                                 gameFinished = true;
                                 player = 1;
                                 break;
+                            //if the Player has =21
                             case "blackjack":
                                 while (dealer.getValue() < 17) {
                                     Card c = deck.deal();
                                     dealer.add(c);
-                                    // outputMsg = new Message("Dealer", "", dealer);
-                                    // out.writeObject(outputMsg);
-                                    // System.out.println(outputMsg);
                                 }
+                                //send the Dealer's final Hand
+                                outputMsg = new Message("Dealer", "", dealer);
+                                out.writeObject(outputMsg);
+
                                 gameFinished = true;
                                 player = 0;
                                 break;
+                            //used to indicate that initial deal has finished and game can begin
                             case "continue":
                                 out.writeObject(new Message("Server", "Please enter 'Hit' or 'Stand'"));
                                 break;
@@ -108,20 +110,16 @@ public class BlackJackMultiServerThread extends Thread {
                             default:
                                 outputMsg = new Message("Server", "Please enter 'Hit' or 'Stand'");
                                 out.writeObject(outputMsg);
-                                // System.out.println(outputMsg);
                                 break;
                         }
-                        
+
+                        // if the game is finished, determine the results and prompt to play again
                         if (gameFinished) {
-                            // send the Dealer's Hand
-                            outputMsg = new Message("Dealer", "", dealer);
-                            out.writeObject(outputMsg);
-                            if(player == 1)
-                            {
-                                outputMsg = new Message("Dealer", "Player busts. Dealer wins. Thank you for playing");
+                            if (player == 1) {
+                                outputMsg = new Message("Dealer", "Player busts. Dealer wins.");
                                 out.writeObject(outputMsg);
                             }
-                            //FIXME result conditions
+                            // FIXME result conditions
                             // send a Message of the game result
                             else if (dealer.validate() == 0)
                                 // outputMsg = new Message("Dealer", "Both players tied.", dealer);
@@ -134,8 +132,11 @@ public class BlackJackMultiServerThread extends Thread {
                                 outputMsg = new Message("Dealer", "You win!");
                             out.writeObject(outputMsg);
 
+                            // prompt the Player to play again
                             outputMsg = new Message("Server", "Enter 'y' or 'n' if you want to play again");
                             out.writeObject(outputMsg);
+
+                            //loop until valid input
                             while ((inputMsg = (Message) in.readObject()) != null) {
                                 content = inputMsg.getContent();
                                 if (content.equalsIgnoreCase("y"))
@@ -148,8 +149,9 @@ public class BlackJackMultiServerThread extends Thread {
                                     out.writeObject(outputMsg);
                                 }
                             }
+                            //break outer loop to finish game
                             break;
-                        }   
+                        }
                     }
                 }
             }

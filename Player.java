@@ -90,7 +90,7 @@ public class Player {
                             fromUser = new Message(playerName, content);
 
                             // print the Client's message
-                            System.out.println(fromUser);
+                            System.out.println(fromUser + "\n\n");
                             // Send response to Server
                             out.writeObject(fromUser);
                         }
