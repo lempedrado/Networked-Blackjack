@@ -57,22 +57,34 @@ public class Player {
                         if(hand.validate() == 0)
                             //send the Player's Hand
                             out.writeObject(new Message(playerName, "Blackjack"));
-                        if(hand.validate() == 1)
+                        else if(hand.validate() == 1)
                             out.writeObject(new Message(playerName, "Bust"));
+                        else if(hand.validate() == -1 && hand.getLength() > 2)
+                            out.writeObject(new Message(playerName, "Continue"));
+                        else if(hand.getLength() == 2)
+                            out.writeObject(new Message(playerName, "start"));
+
                     } 
                     // if the player has Blackjack or Stands and the Dealer is drawing Cards
                     else if((dealer = fromServer.getHand()) != null)
                     {
                         //print the Dealer's Hand
                         System.out.printf("%s %s\n\n", fromServer, dealer);
-
                     }
                     else
                     {
                         //print the Dealer's Message
                         System.out.println(fromServer);
-                        if(content.equals("Please enter 'Hit' or 'Stand'"))
+                        // if(content.equals("Please enter 'Hit' or 'Stand'"))
+                        //server prompts for input
+                        if(fromServer.getSender().equals("Server") && !(content.equals("Connection established.")))
                         {
+                            if(content.equals("Enter 'y' or 'n' if you want to play again"))
+                            {
+                                hand.clear();
+                                dealer = null;
+                            }
+                            
                             //prompt the Player for an action
                             content = stdIn.readLine();
                             fromUser = new Message(playerName, content);

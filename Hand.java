@@ -43,6 +43,18 @@ public class Hand implements Serializable
         return total;
     }
 
+    public int getLength()
+    {
+        return length;
+    }
+
+    public void clear()
+    {
+        hand.clear();
+        length = 0;
+        total = 0;
+    }
+
     /**
      * Determines if this is a valid Hand to continue playing
      * @return -1 for <21, 0 for =21, 1 for >21
