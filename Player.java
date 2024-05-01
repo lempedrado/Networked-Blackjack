@@ -56,13 +56,13 @@ public class Player {
                         //determine if the player has 21 or more
                         if(hand.validate() == 0)
                             //send the Player's Hand
-                            out.writeObject(new Message(playerName, "Blackjack"));
+                            out.writeObject(new Message(playerName, "Blackjack", hand));
                         else if(hand.validate() == 1)
-                            out.writeObject(new Message(playerName, "Bust"));
+                            out.writeObject(new Message(playerName, "Bust", hand));
                         else if(hand.validate() == -1 && hand.getLength() > 2)
-                            out.writeObject(new Message(playerName, "Continue"));
+                            out.writeObject(new Message(playerName, "Continue", hand));
                         else if(hand.getLength() == 2)
-                            out.writeObject(new Message(playerName, "start"));
+                            out.writeObject(new Message(playerName, "start", hand));
 
                     } 
                     // if the player has Blackjack or Stands and the Dealer is drawing Cards
@@ -87,7 +87,7 @@ public class Player {
                             
                             //prompt the Player for an action
                             content = stdIn.readLine();
-                            fromUser = new Message(playerName, content);
+                            fromUser = new Message(playerName, content, hand);
 
                             // print the Client's message
                             System.out.println(fromUser + "\n\n");

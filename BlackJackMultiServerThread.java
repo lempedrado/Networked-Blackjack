@@ -26,14 +26,14 @@ public class BlackJackMultiServerThread extends Thread {
             String content;
             boolean playing = true;
             boolean gameFinished;
-            int player;
+            Hand player;
 
             // Send a message to the Player verifying the connection
             out.writeObject(new Message("Server", "Connection established."));
 
             while (playing) {
                 gameFinished = false;
-                player = -1;
+                // player = -1;
                 // reset the dealer's hand for a new game
                 dealer = new Hand();
                 // initialize the game by dealing the Player and Server two cards each
@@ -57,6 +57,8 @@ public class BlackJackMultiServerThread extends Thread {
                     // get the content of the Message
                     content = inputMsg.getContent();
                     if (content != null) {
+                        player = inputMsg.getHand();
+
                         //determine what to do based on Player's action
                         switch (content.trim().toLowerCase()) {
                             // if the player wants to draw another card
@@ -87,7 +89,6 @@ public class BlackJackMultiServerThread extends Thread {
                                 out.writeObject(outputMsg);
 
                                 gameFinished = true;
-                                player = 1;
                                 break;
                             //if the Player has =21
                             case "blackjack":
@@ -100,7 +101,6 @@ public class BlackJackMultiServerThread extends Thread {
                                 out.writeObject(outputMsg);
 
                                 gameFinished = true;
-                                player = 0;
                                 break;
                             //used to indicate that initial deal has finished and game can begin
                             case "continue":
@@ -115,21 +115,29 @@ public class BlackJackMultiServerThread extends Thread {
 
                         // if the game is finished, determine the results and prompt to play again
                         if (gameFinished) {
-                            if (player == 1) {
+                            //if player busts, dealer wins
+                            if(player.validate() == 1)
                                 outputMsg = new Message("Dealer", "Player busts. Dealer wins.");
-                                out.writeObject(outputMsg);
-                            }
-                            // FIXME result conditions
-                            // send a Message of the game result
-                            else if (dealer.validate() == 0)
-                                // outputMsg = new Message("Dealer", "Both players tied.", dealer);
-                                outputMsg = new Message("Dealer", "Both players tied.");
-                            else if (dealer.validate() == 1)
-                                // outputMsg = new Message("Dealer", "Dealer bust! You win", dealer);
+                            //if player stands and dealer busts, player wins
+                            else if(dealer.validate() == 1)
                                 outputMsg = new Message("Dealer", "Dealer bust! You win");
-                            else
-                                // outputMsg = new Message("Dealer", "You win!", dealer);
+                            //both player and dealer have the same hand value
+                            else if (dealer.validate() == player.validate() && dealer.getValue() == player.getValue())
+                                outputMsg = new Message("Dealer", "Both players tied.");
+                            //dealer has 21 and player has less than 21
+                            else if(player.validate() == -1 && dealer.validate() == 0)
+                                outputMsg = new Message("Dealer", "Dealer win!");
+                            //player has 21 and dealer has less than 21
+                            else if(player.validate() == 0 && dealer.validate() == -1)
                                 outputMsg = new Message("Dealer", "You win!");
+                            //if both player and dealer have below 21, determine who has the higher value hand
+                            else
+                            {
+                                if(dealer.getValue() < player.getValue())
+                                    outputMsg = new Message("Dealer", "You win!");
+                                else
+                                    outputMsg = new Message("Dealer", "Dealer win!");
+                            }
                             out.writeObject(outputMsg);
 
                             // prompt the Player to play again
@@ -155,6 +163,8 @@ public class BlackJackMultiServerThread extends Thread {
                     }
                 }
             }
+            outputMsg = new Message("Server", "Thank you for playing");
+            out.writeObject(outputMsg);
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
