@@ -115,6 +115,8 @@ public class BlackJackMultiServerThread extends Thread {
 
                         // if the game is finished, determine the results and prompt to play again
                         if (gameFinished) {
+                            System.out.println("player: " + player.getValue());
+                            System.out.println("dealer: " + dealer.getValue());
                             //if player busts, dealer wins
                             if(player.validate() == 1)
                                 outputMsg = new Message("Dealer", "Player busts. Dealer wins.");

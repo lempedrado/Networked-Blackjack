@@ -24,6 +24,7 @@ public class Hand implements Serializable
     public void add(Card c)
     {
         length++;
+        //FIXME check all cards instead of just the one added
         //if the card is an Ace, determine if it will be 11 or 1
         if(c.getRank().equals("A"))
         {
@@ -92,6 +93,18 @@ public class Hand implements Serializable
         String ret = "";
         for(int i = 0; i < length; i++)
             ret += hand.get(i) + " ";
+        //XXX testing if val is properly set
+        // ret += "= " + valString();
+        return ret.trim();
+    }
+
+    //XXX testing if val is properly set
+    private String valString()
+    {
+        String ret = "";
+        for(int i = 0; i < length; i++)
+            ret += hand.get(i).getValue() + " ";
+        ret += "= " + total;
         return ret.trim();
     }
 }

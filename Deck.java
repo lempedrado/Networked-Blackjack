@@ -52,7 +52,7 @@ public class Deck implements Serializable
                 if(r == 0)
                     val = 11;
                 //Face cards (JACK, QUEEN, KING)
-                else if(r > 9 && r < 13)
+                else if(r >= 9)
                     val = 10;
                 //Number card values
                 else
