@@ -2,14 +2,13 @@ import java.io.*;
 /**
  *  Lloyd Empedrado
  *  CS450-001 Computer Networks
- *  Lab 6
+ *  HW 4
  */
 
 public class Message implements Serializable
 {
     private String sender;
     private String content;
-    // private Object o;
     private Card card;
     private Hand hand;
 
@@ -46,16 +45,8 @@ public class Message implements Serializable
     {
         this.sender = sender;
         this.content = content;
-        // this.o = card;
         this.hand = hand;
     }
-
-    // public Message(String sender, String content, Object o)
-    // {
-    //     this.sender = sender;
-    //     this.content = content;
-    //     this.o = o;
-    // }
 
     /**
      *  @return the sender of this message

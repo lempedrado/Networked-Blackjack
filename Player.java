@@ -1,11 +1,8 @@
-// import java.util.ArrayList;
 import java.io.*;
 import java.net.*;
 
 public class Player {
-    // private static Table table;
-
-    public static void main(String args[]) throws IOException {
+        public static void main(String args[]) throws IOException {
         if (args.length != 3) {
             System.err.println("Usage: java Player <host name> <player name> <port number>");
             System.exit(1);
@@ -26,20 +23,7 @@ public class Player {
             // The String content of a Message
             String content;
             Hand hand = new Hand();
-            Hand dealer;
             Card c;
-
-            // //get the shared Table resource
-            // fromServer = (Message)in.readObject();
-            // System.out.println(fromServer);
-            // Object o = fromServer.getObject();
-            // if(o instanceof Table)
-            // {
-            // table = (Table)o;
-            // System.out.println("Joined a Blackjack table");
-            // }
-            // else
-            // throw new Exception("Could not join a Blackjack table.");
 
             // Receive Messages from the Server
             while ((fromServer = (Message) in.readObject()) != null) {
@@ -63,28 +47,18 @@ public class Player {
                             out.writeObject(new Message(playerName, "Continue", hand));
                         else if(hand.getLength() == 2)
                             out.writeObject(new Message(playerName, "start", hand));
-
-                    } 
-                    // if the player has Blackjack or Stands and the Dealer is drawing Cards
-                    else if((dealer = fromServer.getHand()) != null)
-                    {
-                        //print the Dealer's Hand
-                        System.out.printf("%s %s\n\n", fromServer, dealer);
                     }
                     else
                     {
                         //print the Dealer's Message
                         System.out.println(fromServer);
-                        // if(content.equals("Please enter 'Hit' or 'Stand'"))
                         //server prompts for input
                         if(fromServer.getSender().equals("Server") && !(content.equals("Connection established.")))
                         {
                             if(content.equals("Enter 'y' or 'n' if you want to play again"))
-                            {
-                                hand.clear();
-                                dealer = null;
-                            }
-                            
+                                hand = new Hand();
+                            else if(content.equals("Thank you for playing"))
+                                break;
                             //prompt the Player for an action
                             content = stdIn.readLine();
                             fromUser = new Message(playerName, content, hand);
@@ -98,6 +72,7 @@ public class Player {
                 }
 
             }
+            IMSocket.close();
             // catches error if the Client's connection parameters are not consistent with
             // the Server
         } catch (UnknownHostException e) {

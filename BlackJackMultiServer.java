@@ -12,12 +12,12 @@ public class BlackJackMultiServer {
 
         int portNumber = Integer.parseInt(args[0]);
         boolean listening = true;
-        // Table t = new Table();
+        Deck deck = new Deck();
         
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) { 
             while (listening) {
-	            // new BlackJackMultiServerThread(serverSocket.accept(), t).start();
-                new BlackJackMultiServerThread(serverSocket.accept()).start();
+                //all players will share the same deck of cards to play with
+                new BlackJackMultiServerThread(serverSocket.accept(), deck).start();
 	        }
 	    } catch (IOException e) {
             System.err.println("Could not listen on port " + portNumber);

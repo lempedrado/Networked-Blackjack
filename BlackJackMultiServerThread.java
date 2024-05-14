@@ -3,17 +3,14 @@ import java.io.*;
 
 public class BlackJackMultiServerThread extends Thread {
     private Socket socket = null;
-    // private Table table = null;
     private Hand dealer;
     private Deck deck;
 
-    public BlackJackMultiServerThread(Socket socket) {
+    public BlackJackMultiServerThread(Socket socket, Deck deck) {
         super("BlackJackMultiServerThread");
         this.socket = socket;
-        this.deck = new Deck();
+        this.deck = deck;
         this.dealer = new Hand();
-        // this.table = table;
-        // this.hand = new ArrayList<Card>();
     }
 
     public void run() {
@@ -33,7 +30,6 @@ public class BlackJackMultiServerThread extends Thread {
 
             while (playing) {
                 gameFinished = false;
-                // player = -1;
                 // reset the dealer's hand for a new game
                 dealer = new Hand();
                 // initialize the game by dealing the Player and Server two cards each
@@ -77,7 +73,7 @@ public class BlackJackMultiServerThread extends Thread {
                                     dealer.add(c);
                                 }
                                 // send the Dealer's final Hand
-                                outputMsg = new Message("Dealer", "", dealer);
+                                outputMsg = new Message("Dealer", dealer.toString());
                                 out.writeObject(outputMsg);
 
                                 gameFinished = true;
@@ -85,7 +81,7 @@ public class BlackJackMultiServerThread extends Thread {
                             //if the Player has over 21
                             case "bust":
                                 // Send the Dealer's Hand
-                                outputMsg = new Message("Dealer", "", dealer);
+                                outputMsg = new Message("Dealer", dealer.toString());
                                 out.writeObject(outputMsg);
 
                                 gameFinished = true;
@@ -97,7 +93,7 @@ public class BlackJackMultiServerThread extends Thread {
                                     dealer.add(c);
                                 }
                                 //send the Dealer's final Hand
-                                outputMsg = new Message("Dealer", "", dealer);
+                                outputMsg = new Message("Dealer", dealer.toString());
                                 out.writeObject(outputMsg);
 
                                 gameFinished = true;

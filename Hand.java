@@ -6,6 +6,7 @@ public class Hand implements Serializable
     private ArrayList<Card> hand;
     private int length;
     private int total;
+    private int aceCount;
     
     /**
      * Hand constructor
@@ -15,6 +16,7 @@ public class Hand implements Serializable
         this.hand = new ArrayList<Card>();
         this.length = 0;
         this.total = 0;
+        this.aceCount = 0;
     }
 
     /**
@@ -24,16 +26,28 @@ public class Hand implements Serializable
     public void add(Card c)
     {
         length++;
-        //FIXME check all cards instead of just the one added
-        //if the card is an Ace, determine if it will be 11 or 1
-        if(c.getRank().equals("A"))
-        {
-            //if a value of 11 will result in a total over 21, set the value to 1
-            if(total + 11 > 21)
-                c.setValue(1);
-        }
         total = total + c.getValue();
         hand.add(c);
+
+        if(c.getRank().equals("A"))
+            aceCount++;
+            
+        //update any Ace cards to 1 instead of 11 if they exist and the total is greater than 21
+        while(total > 21 && aceCount > 0)
+        {
+            //find an ace with val==11 and set val to 1 then continue
+            for(int i = 0; i < length; i++)
+            {
+                Card temp = hand.get(i);
+                if(temp.getRank().equals("A") && temp.getValue() == 11)
+                {
+                    temp.setValue(1);
+                    hand.set(i, temp);
+                    total -= 10;
+                    aceCount--;
+                }
+            }
+        }
     }
 
     /**
@@ -47,13 +61,6 @@ public class Hand implements Serializable
     public int getLength()
     {
         return length;
-    }
-
-    public void clear()
-    {
-        hand.clear();
-        length = 0;
-        total = 0;
     }
 
     /**
@@ -93,18 +100,6 @@ public class Hand implements Serializable
         String ret = "";
         for(int i = 0; i < length; i++)
             ret += hand.get(i) + " ";
-        //XXX testing if val is properly set
-        // ret += "= " + valString();
-        return ret.trim();
-    }
-
-    //XXX testing if val is properly set
-    private String valString()
-    {
-        String ret = "";
-        for(int i = 0; i < length; i++)
-            ret += hand.get(i).getValue() + " ";
-        ret += "= " + total;
         return ret.trim();
     }
 }
